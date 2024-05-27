@@ -199,7 +199,11 @@ class DevelopmentModeCommands extends Tasks
                 ->run();
             $resultData->append($taskResult);
             $this->io()->section("import $siteName database.");
-            $taskResult = $this->taskExec("zcat $dbPath | $dbDriver -h mariadb -u tugboat -ptugboat $dbName")
+            # With `tail +2`, we are temporarily stripping out the first line
+            # of the database dump to remove a sandbox command that MariaDB
+            # does not understand.
+            # See: https://mariadb.org/mariadb-dump-file-compatibility-change/
+            $taskResult = $this->taskExec("zcat $dbPath | tail +2 | $dbDriver -h mariadb -u tugboat -ptugboat $dbName")
                 ->run();
             $resultData->append($taskResult);
             $taskResult = $this->taskExec('rm')->args($dbPath)->run();
